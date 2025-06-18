@@ -21,6 +21,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button  } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import useProject from "@/hooks/use-project";
 
 const appcontent = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -29,14 +30,12 @@ const appcontent = [
   { title: "Premium", url: "/premium", icon: CreditCard },
 ];
 
-const projects = [
-  { name: "Project Alpha" },
-];
 
 export function AppSidebar() {
   const pathname = usePathname()
   const {open} = useSidebar()
   const [isMounted, setIsMounted] = useState(false)
+  const {projects,projectId,setProjectId} = useProject()
 
     useEffect(() => {
     setIsMounted(true);
@@ -91,24 +90,36 @@ export function AppSidebar() {
           <SidebarGroupLabel>Your Projects</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {projects.map((project) => (
-                <SidebarMenuItem key={project.name}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      href={`/projects/${project.name.toLowerCase().replace(/\s+/g, "-")}`}
+            {projects?.map((project) => (
+              <SidebarMenuItem key={project.name}>
+                <SidebarMenuButton asChild>
+                  <div
+                    onClick={() => setProjectId(project.id)}
+                    className={cn(
+                      "flex items-center rounded-md py-2 text-sm hover:bg-muted transition-colors",
+                      open ? "px-3 gap-3 justify-start" : "justify-center px-0"
+                    )}
+                  >
+                    <div
                       className={cn(
-                        "flex items-center rounded-md py-2 text-sm hover:bg-muted transition-colors",
-                        open ? "px-3 gap-3 justify-start" : "justify-center px-0"
+                        "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold uppercase border",
+                        project.id === projectId
+                          ? "bg-primary text-white border-transparent"
+                          : "bg-white text-muted-foreground border-muted"
                       )}
                     >
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-semibold uppercase text-muted-foreground">
-                        {project.name[0]}
-                      </div>
-                      {open && <span className="truncate">{project.name}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      {project.name[0]}
+                    </div>
+
+                    {open && (
+                      <span className="truncate text-muted-foreground">
+                        {project.name}
+                      </span>
+                    )}
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                 <div className="pt-2">
