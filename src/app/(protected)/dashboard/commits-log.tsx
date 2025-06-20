@@ -14,7 +14,7 @@ const CommitLog = () => {
   return (
     <div>
       <ul className="space-y-6">
-        {commits?.map((commit, commitIdx) => (
+        {commits?.map((commit :any , commitIdx : number ) => (
           <li key={commit.id} className="relative flex gap-x-4">
             <div
               className={cn(
@@ -25,11 +25,18 @@ const CommitLog = () => {
               <div className="w-px translate-x-1 bg-gray-200" />
             </div>
 
-            <img
-              src={commit.commitAuthorAvatar}
-              alt="commit avaar"
-              className="relative mt-4 size-8 flex-none rounded-full bg-gray-50"
-            />
+            {commit.commitAuthorAvatar ? (
+              <img
+                src={commit.commitAuthorAvatar}
+                alt="commit avatar"
+                className="relative mt-4 size-8 flex-none rounded-full bg-gray-50"
+              />
+            ) : (
+              <div className="relative mt-4 size-8 flex-none rounded-full bg-gray-50 flex items-center justify-center text-xs text-gray-600">
+                👤
+              </div>
+            )}
+
 
             <div className="flex-auto rounded-mg bg-white p-3 ring-1 ring-inset ring-gray-200">
               <div className="flex justify-between gap-x-4">

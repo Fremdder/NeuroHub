@@ -63,7 +63,7 @@ export const projectRouter = createTRPCRouter({
           }
         });
       }),
-      saveAnswer:protectedProcedure.input(z.object({
+    saveAnswer:protectedProcedure.input(z.object({
         projectId:z.string(),
         question:z.string(),
         answer:z.string(),
@@ -76,6 +76,22 @@ export const projectRouter = createTRPCRouter({
                 projectId:input.projectId,
                 question:input.question,
                 userId:ctx.user.userId!
+            }
+        })
+      }),
+      getQuestions : protectedProcedure.input(z.object({
+        projectId:z.string()
+      })
+      ).query(async ({ctx,input}) => {
+        return await ctx.db.question.findMany({
+            where: {
+                projectId:input.projectId
+            },
+            include: {
+                user:true
+            },
+            orderBy:{
+                createdAt:'desc'
             }
         })
       })
