@@ -1,6 +1,7 @@
 import { db } from "@/server/db";
 import { Octokit } from "octokit";
 import { aisummariseCommit } from "./gemini";
+import  axios  from 'axios'
 
 export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -14,20 +15,22 @@ type Response = {
   commitDate: string;
 };
 
-// 🔧 Utility to extract owner/repo safely
-function extractOwnerRepo(githubUrl: string): [string, string] {
-  const url = new URL(githubUrl);
-  const [owner, repo] = url.pathname.replace(/^\/|\/$/g, "").split("/");
-  if (!owner || !repo) throw new Error("Invalid GitHub URL");
-  return [owner, repo];
-}
+// function extractOwnerRepo(githubUrl: string): [string, string] {
+//   const url = new URL(githubUrl);
+//   const [owner, repo] = url.pathname.replace(/^\/|\/$/g, "").split("/");
+//   if (!owner || !repo) throw new Error("Invalid GitHub URL");
+//   return [owner, repo];
+// }
 
 export const getCommitHashes = async (githubUrl: string): Promise<Response[]> => {
-  const [owner, repo] = extractOwnerRepo(githubUrl);
+  const [owner, repo] = githubUrl.split('/').slice(-2);
 
+  if(!owner || !repo){
+    throw new Error('Invalid Github URL')
+  }
   const { data } = await octokit.rest.repos.listCommits({
     owner,
-    repo,
+    repo 
   });
 
   const sortedCommits = data.sort((a: any, b: any) =>
@@ -39,8 +42,8 @@ export const getCommitHashes = async (githubUrl: string): Promise<Response[]> =>
     commitMessage: commit.commit?.message ?? "",
     commitAuthorName: commit.commit?.author?.name ?? "",
     commitAuthorAvatar: commit?.author?.avatar_url ?? "",
-    commitDate: commit.commit?.author?.date ?? "",
-  }));
+    commitDate: commit.commit?.author?.date ?? ""
+  }))
 };
 
 export const pollCommits = async (projectId: string) => {
@@ -49,49 +52,43 @@ export const pollCommits = async (projectId: string) => {
   const unprocessedCommits = await filterUnprocessedCommits(projectId, commitHashes);
 
   const summaryResponses = await Promise.allSettled(
-    unprocessedCommits.map((commit) => SummariesCommit(githubUrl, commit.commitHash))
+    unprocessedCommits.map((commit =>{
+      return SummariesCommit(githubUrl, commit.commitHash)}
+    ))
   );
 
-  const summarises = summaryResponses.map((response, index) => {
-    if (response.status === "fulfilled") {
-      return response.value;
-    } else {
-      console.error(`❌ Failed to summarize commit ${unprocessedCommits[index]?.commitHash}:`, response.reason);
-      return "Summary not available";
-    }
+  const summarises = summaryResponses.map((response) => {
+    if (response.status === 'fulfilled') {
+      return response.value as string;
+    } 
+    return ""
   });
 
-  const commit = await db.commit.createMany({
-    data: summarises.map((summary, index) => ({
-      projectId: projectId,
-      commitHash: unprocessedCommits[index]!.commitHash,
-      commitMessage: unprocessedCommits[index]!.commitMessage,
-      commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
-      commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
-      commitDate: unprocessedCommits[index]!.commitDate,
-      summary,
-    })),
+  const commits = await db.commit.createMany({
+    data: summarises.map((summary, index) => {
+      console.log(`processing commit ${index}`)
+      return{
+        projectId: projectId,
+        commitHash: unprocessedCommits[index]!.commitHash,
+        commitMessage: unprocessedCommits[index]!.commitMessage,
+        commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+        commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+        commitDate: unprocessedCommits[index]!.commitDate,
+        summary,
+      }
+    }),
   });
 
-  return commit;
+  return commits;
 };
 
-// ✅ Uses Octokit to fetch authenticated diff data
 async function SummariesCommit(githubUrl: string, commitHash: string) {
-  const [owner, repo] = extractOwnerRepo(githubUrl);
-
-  const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
-    owner,
-    repo,
-    ref: commitHash,
-    headers: {
-      Accept: "application/vnd.github.v3.diff",
-    },
-  });
-
-  const diffText = response.data as unknown as string;
-
-  return (await aisummariseCommit(diffText)) || "Response Nahi aaya";
+  const { data } = await axios.get(`${githubUrl}/commit/${commitHash}.diff` , {
+    headers :{
+      Accept:'applicaton/vnd.github.v3.diff'
+    }
+  })
+  return await aisummariseCommit(data) || "empty"
 }
 
 
@@ -107,7 +104,7 @@ async function fetchProjectGithubUrl(projectId: string) {
     throw new Error("Project has no github url");
   }
 
-  return { project, githubUrl: project.githubUrl };
+  return { project, githubUrl: project?.githubUrl };
 }
 
 async function filterUnprocessedCommits(projectId: string, commitHashes: Response[]) {
