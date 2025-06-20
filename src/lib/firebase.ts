@@ -10,15 +10,14 @@ import { error } from "console";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBC8bYWxu0RAVhKsnV7ZQmujqP8clKno5E",
-  authDomain: "neurohub-60289.firebaseapp.com",
-  projectId: "neurohub-60289",
-  storageBucket: "neurohub-60289.firebasestorage.app",
-  messagingSenderId: "302140556758",
-  appId: "1:302140556758:web:7cf2eac440ed2bb5539077",
-  measurementId: "G-N7RS4792BF"
+    apiKey: "AIzaSyCSJ1n_D3yzyQ-CGRhpNAaLtqK-kI5uehk",
+    authDomain: "neurohub-ea661.firebaseapp.com",
+    projectId: "neurohub-ea661",
+    storageBucket: "neurohub-ea661.firebasestorage.app",
+    messagingSenderId: "117726192412",
+    appId: "1:117726192412:web:488052e4ecb69c825b50d9",
+    measurementId: "G-9SKYLEEF2G"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);

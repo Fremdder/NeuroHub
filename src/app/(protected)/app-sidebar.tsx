@@ -26,8 +26,8 @@ import useProject from "@/hooks/use-project";
 const appcontent = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Q&A", url: "/qna", icon: Bot },
-  { title: "Meeting", url: "/meeting", icon: Presentation },
-  { title: "Premium", url: "/premium", icon: CreditCard },
+  { title: "Meetings", url: "/meetings", icon: Presentation },
+  { title: "billing", url: "/billing", icon: CreditCard },
 ];
 
 
