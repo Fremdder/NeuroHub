@@ -46,16 +46,16 @@ export function AppSidebar() {
     variant="floating"
     className="bg-gradient-to-b from-purple-50 to-white border-r">
       <SidebarHeader className={cn(open ? "pl-2" : "pl-0")}>
-  <div
-    className={cn(
-      "text-xl font-bold text-purple-700",
-      open ? "flex items-center gap-2 justify-start" : "flex justify-center"
-    )}
-  >
-    <Brain className="h-6 w-6" />
-    {isMounted && open && <span>NeuroHub</span>}
-  </div>
-</SidebarHeader>
+        <div
+          className={cn(
+            "text-xl font-bold text-purple-700",
+            open ? "flex items-center gap-2 justify-start" : "flex justify-center"
+          )}
+        >
+          <Brain className="h-6 w-6" />
+          {isMounted && open && <span>NeuroHub</span>}
+        </div>
+      </SidebarHeader>
 
 
 

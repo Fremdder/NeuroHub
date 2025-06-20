@@ -3,7 +3,7 @@ import type { Document } from '@langchain/core/documents';
 
 const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 const model = genai.getGenerativeModel({
-    model : 'gemini-2.5-flash'
+    model : 'gemini-1.5-flash'
 })
 
 export const aisummariseCommit = async (diff: string) => {
@@ -42,6 +42,7 @@ export const aisummariseCommit = async (diff: string) => {
         ## What to Avoid:
         - Generic descriptions like "updated file" or "changed code"
         - Line-by-line explanations of syntax changes
+        - Here's a summary of the git diff:
         - Overly technical jargon without context
         - Listing every single file when there are many changes
         
