@@ -17,21 +17,32 @@ export async function askQuestion(question: string, projectId: string) {
   const vectorQuery = `[${queryVector.join(',')}]`
 
   const result = await db.$queryRaw`
-    SELECT "fileName", "sourceCode", "summary",
-    1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) AS similarity
+  WITH ranked_files AS (
+    SELECT 
+      "fileName", 
+      "sourceCode", 
+      "summary",
+      1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) AS similarity
     FROM "SourceCodeEmbedding"
-    WHERE 1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) > .5
-    AND "projectId" = ${projectId}
-    ORDER BY similarity DESC
-    LIMIT 10
-  ` as { fileName: string; sourceCode: string; summary: string }[]
+    WHERE "projectId" = ${projectId}
+    AND 1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) > 0.2
+  ),
+  total_count AS (
+    SELECT COUNT(*) AS count FROM ranked_files
+  )
+  SELECT * FROM ranked_files, total_count
+  WHERE total_count.count < 20 OR ranked_files.similarity IS NOT NULL
+  ORDER BY similarity DESC
+  LIMIT CASE WHEN (SELECT count FROM total_count) < 20 THEN 1000 ELSE 10 END;
+` as { fileName: string; sourceCode: string; summary: string }[]
+
 
   let context = ''
 
   for (const doc of result) {
     context += `source: ${doc.fileName}\ncode content: ${doc.sourceCode}\nsummary of file: ${doc.summary}\n\n`
   }
-
+  
   (async () => {
     const { textStream } = await streamText({
       model: google('gemini-1.5-flash'),
@@ -66,6 +77,9 @@ Answer in markdown syntax, with code snippets if needed. Be as detailed as possi
 
     stream.done()
   })()
+
+  console.log(context)
+
 
   return {
     output: stream.value,
