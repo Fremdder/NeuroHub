@@ -27,7 +27,7 @@ const appcontent = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Q&A", url: "/qna", icon: Bot },
   { title: "Meetings", url: "/meetings", icon: Presentation },
-  { title: "billing", url: "/billing", icon: CreditCard },
+  // { title: "billing", url: "/billing", icon: CreditCard },
 ];
 
 
