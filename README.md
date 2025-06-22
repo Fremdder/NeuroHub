@@ -22,7 +22,7 @@ The idea for **NeuroHub** was born from the daily friction developers face when 
 --- 
 ## High-Level Architecture
 
-![Architecture Diagram](./public/HLA.jpg.png)
+![Architecture Diagram](./public/HLA.jpg)
 
 - **Frontend** (Next.js, ShadCN UI, Tailwind) interacts with users and Clerk (authentication).
 - **Backend** (tRPC Server) exposes type-safe APIs, manages all integration logic, and connects to Prisma ORM.
@@ -40,7 +40,7 @@ The idea for **NeuroHub** was born from the daily friction developers face when 
 <details>
   <summary>Click to view architecture workflow</summary>
   
-  ![Workflow Diagram](./public/HLD.png.png)
+  ![Workflow Diagram](./public/HLD.png)
 </details>
 
 ### 1. Project Creation
